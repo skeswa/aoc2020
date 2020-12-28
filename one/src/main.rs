@@ -8,32 +8,56 @@ use tokio::io::AsyncReadExt;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let input_file = read_input_file()
+    let input_integers = read_expense_report_entries()
         .await
         .context("Failed to read input file")?;
 
-    println!("Hello, world! {}", input_file);
+    println!("Hello, world! {:?}", input_integers);
 
     Ok(())
 }
 
-async fn read_input_file() -> Result<usize, Error> {
+/// Reads the input file, returning each line represented as a 32-bit integer.
+async fn read_expense_report_entries() -> Result<Vec<i32>, Error> {
     let pwd = current_dir().context("Failed to read current working directory")?;
-    let input_file_path = pwd.join("files/input.txt");
+    let expense_report_file_path = pwd.join("files/input.txt");
 
-    let mut input_file = File::open(&input_file_path).await.context(format!(
-        "Failed to open file at path \"{}\"",
-        input_file_path.display()
-    ))?;
-    let mut input_file_contents = vec![];
+    let mut expense_report_file =
+        File::open(&expense_report_file_path)
+            .await
+            .with_context(|| {
+                format!(
+                    "Failed to open file at path \"{}\"",
+                    expense_report_file_path.display()
+                )
+            })?;
+    let mut expense_report_file_contents = vec![];
 
-    input_file
-        .read_to_end(&mut input_file_contents)
+    expense_report_file
+        .read_to_end(&mut expense_report_file_contents)
         .await
-        .context(format!(
-            "Failed to read file at path \"{}\"",
-            input_file_path.display()
-        ))?;
+        .with_context(|| {
+            format!(
+                "Failed to read file at path \"{}\"",
+                expense_report_file_path.display()
+            )
+        })?;
 
-    Ok(input_file_contents.len())
+    String::from_utf8_lossy(&expense_report_file_contents)
+        .lines()
+        .enumerate()
+        .map(
+            |(expense_report_file_line_index, expense_report_file_line_text)| {
+                expense_report_file_line_text
+                    .parse::<i32>()
+                    .with_context(|| {
+                        format!(
+                    "Failed to convert expense report file entry at line {} (\"{}\") to integer",
+                    /* lineNumber= */ expense_report_file_line_index + 1,
+                    expense_report_file_line_text
+                )
+                    })
+            },
+        )
+        .collect()
 }
