@@ -12,22 +12,32 @@ async fn main() -> Result<()> {
         .await
         .context("Failed to read expense report")?;
 
-    let matching_expense_report_entries =
-        find_matching_expense_report_entries(expense_report_entries)
-            .context("Could not find matching expense report entries")?;
+    let expense_report_entry_pair = find_expense_report_entry_pair(&expense_report_entries)
+        .context("Could not find expense report entry pair")?;
 
     println!(
-        "Entry 1:\t{}\nEntry 2:\t{}\nProduct:\t{}",
-        matching_expense_report_entries.0,
-        matching_expense_report_entries.1,
-        matching_expense_report_entries.0 * matching_expense_report_entries.1
+        "{} × {} = {}",
+        expense_report_entry_pair.0,
+        expense_report_entry_pair.1,
+        expense_report_entry_pair.0 * expense_report_entry_pair.1
+    );
+
+    let expense_report_entry_trio = find_expense_report_entry_trio(&expense_report_entries)
+        .context("Could not find expense report entry trio")?;
+
+    println!(
+        "{} × {} × {} = {}",
+        expense_report_entry_trio.0,
+        expense_report_entry_trio.1,
+        expense_report_entry_trio.2,
+        expense_report_entry_trio.0 * expense_report_entry_trio.1 * expense_report_entry_trio.2
     );
 
     Ok(())
 }
 
 /// Finds a pair of expense report enties that sum to `2020`.
-fn find_matching_expense_report_entries(expense_report_entries: Vec<i32>) -> Option<(i32, i32)> {
+fn find_expense_report_entry_pair(expense_report_entries: &Vec<i32>) -> Option<(i32, i32)> {
     expense_report_entries
         .iter()
         .flat_map(|expense_report_entry| {
@@ -41,6 +51,34 @@ fn find_matching_expense_report_entries(expense_report_entries: Vec<i32>) -> Opt
             *expense_report_entry + *other_expense_report_entry == 2020
         })
         .map(|(a, b)| (*a, *b))
+}
+
+/// Finds a trio of expense report enties that sum to `2020`.
+fn find_expense_report_entry_trio(expense_report_entries: &Vec<i32>) -> Option<(i32, i32, i32)> {
+    expense_report_entries
+        .iter()
+        .flat_map(|expense_report_entry| {
+            expense_report_entries
+                .iter()
+                .flat_map(move |other_expense_report_entry| {
+                    expense_report_entries
+                        .iter()
+                        .map(move |another_expense_report_entry| {
+                            (
+                                expense_report_entry,
+                                other_expense_report_entry,
+                                another_expense_report_entry,
+                            )
+                        })
+                })
+        })
+        .find(
+            |(expense_report_entry, other_expense_report_entry, another_expense_report_entry)| {
+                *expense_report_entry + *other_expense_report_entry + *another_expense_report_entry
+                    == 2020
+            },
+        )
+        .map(|(a, b, c)| (*a, *b, *c))
 }
 
 /// Reads the input file, returning each line represented as a 32-bit integer.
