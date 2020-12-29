@@ -8,13 +8,39 @@ use tokio::io::AsyncReadExt;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let input_integers = read_expense_report_entries()
+    let expense_report_entries = read_expense_report_entries()
         .await
-        .context("Failed to read input file")?;
+        .context("Failed to read expense report")?;
 
-    println!("Hello, world! {:?}", input_integers);
+    let matching_expense_report_entries =
+        find_matching_expense_report_entries(expense_report_entries)
+            .context("Could not find matching expense report entries")?;
+
+    println!(
+        "Entry 1:\t{}\nEntry 2:\t{}\nProduct:\t{}",
+        matching_expense_report_entries.0,
+        matching_expense_report_entries.1,
+        matching_expense_report_entries.0 * matching_expense_report_entries.1
+    );
 
     Ok(())
+}
+
+/// Finds a pair of expense report enties that sum to `2020`.
+fn find_matching_expense_report_entries(expense_report_entries: Vec<i32>) -> Option<(i32, i32)> {
+    expense_report_entries
+        .iter()
+        .flat_map(|expense_report_entry| {
+            expense_report_entries
+                .iter()
+                .map(move |other_expense_report_entry| {
+                    (expense_report_entry, other_expense_report_entry)
+                })
+        })
+        .find(|(expense_report_entry, other_expense_report_entry)| {
+            *expense_report_entry + *other_expense_report_entry == 2020
+        })
+        .map(|(a, b)| (*a, *b))
 }
 
 /// Reads the input file, returning each line represented as a 32-bit integer.
