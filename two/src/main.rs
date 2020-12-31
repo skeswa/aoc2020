@@ -7,7 +7,7 @@ extern crate tokio;
 mod password_database;
 
 use anyhow::{Context, Error, Result};
-use password_database::PasswordDatabase;
+use password_database::{PasswordDatabase, PasswordValidationStrategy};
 use std::env::current_dir;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
@@ -18,15 +18,31 @@ async fn main() -> Result<()> {
         .await
         .context("Failed to read password database")?;
 
-    let number_of_valid_password_entries = password_database
+    let number_of_valid_repetition_range_password_entries = password_database
         .entries
         .iter()
-        .filter(|password_database_entry| password_database_entry.is_valid())
+        .filter(|password_database_entry| {
+            password_database_entry.is_valid(PasswordValidationStrategy::LetterRepetitionRange)
+        })
         .count();
 
     println!(
-        "Valid password entries: {} / {}",
-        number_of_valid_password_entries,
+        "Valid repetition range password entries: {} / {}",
+        number_of_valid_repetition_range_password_entries,
+        password_database.entries.len()
+    );
+
+    let number_of_valid_letter_positions_password_entries = password_database
+        .entries
+        .iter()
+        .filter(|password_database_entry| {
+            password_database_entry.is_valid(PasswordValidationStrategy::LetterPositions)
+        })
+        .count();
+
+    println!(
+        "Valid letter position password entries: {} / {}",
+        number_of_valid_letter_positions_password_entries,
         password_database.entries.len()
     );
 

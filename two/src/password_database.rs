@@ -42,32 +42,8 @@ impl PasswordDatabase {
 pub struct PasswordDatabaseEntry {
     /// Password wrapped by this `PasswordDatabaseEntry`.
     password: String,
-    /// Rule validating `password`.
-    rule: PasswordFormatRule,
-}
-
-impl PasswordDatabaseEntry {
-    /// Returns `true` if this entry's `rule` applies to its `password`.
-    pub fn is_valid(&self) -> bool {
-        let repetitions = self
-            .password
-            .chars()
-            .filter(|password_char| *password_char == self.rule.letter)
-            .count() as i64;
-
-        repetitions >= self.rule.min_repetitions && repetitions <= self.rule.max_repetitions
-    }
-}
-
-/// Describes a valid password.
-#[derive(Debug)]
-struct PasswordFormatRule {
-    /// The letter to which `maxRepetitions` and `minRepetitions` refer.
-    letter: char,
-    /// Maximum number of times that `letter` can appear in a password.
-    max_repetitions: i64,
-    /// Minimum number of times that `letter` can appear in a password.
-    min_repetitions: i64,
+    /// Data used to validate `password`.
+    validation_metadata: PasswordValidationMetadata,
 }
 
 impl PasswordDatabaseEntry {
@@ -80,8 +56,8 @@ impl PasswordDatabaseEntry {
             .captures(text)
             .with_context(|| format!("Failed to parse password database entry text: {}", text))?;
 
-        let min_repetitions = capture_groups.get(1).unwrap().as_str().parse::<i64>()?;
-        let max_repetitions = capture_groups.get(2).unwrap().as_str().parse::<i64>()?;
+        let first_parameter = capture_groups.get(1).unwrap().as_str().parse::<i64>()?;
+        let second_parameter = capture_groups.get(2).unwrap().as_str().parse::<i64>()?;
         let letter = capture_groups
             .get(3)
             .unwrap()
@@ -93,11 +69,81 @@ impl PasswordDatabaseEntry {
 
         Ok(PasswordDatabaseEntry {
             password: password.to_owned(),
-            rule: PasswordFormatRule {
+            validation_metadata: PasswordValidationMetadata {
                 letter,
-                max_repetitions,
-                min_repetitions,
+                parameters: (first_parameter, second_parameter),
             },
         })
     }
+
+    /// Returns `true` if this entry's `rule` applies to its `password`.
+    pub fn is_valid(&self, strategy: PasswordValidationStrategy) -> bool {
+        match strategy {
+            PasswordValidationStrategy::LetterRepetitionRange => {
+                let PasswordDatabaseEntry {
+                    password,
+                    validation_metadata:
+                        PasswordValidationMetadata {
+                            letter,
+                            parameters: (min_repetitions, max_repetitions),
+                        },
+                } = self;
+
+                let repetitions = password
+                    .chars()
+                    .filter(|password_char| *password_char == *letter)
+                    .count() as i64;
+
+                repetitions >= *min_repetitions && repetitions <= *max_repetitions
+            }
+            PasswordValidationStrategy::LetterPositions => {
+                let PasswordDatabaseEntry {
+                    password,
+                    validation_metadata:
+                        PasswordValidationMetadata {
+                            letter,
+                            parameters: (first_position, second_position),
+                        },
+                } = self;
+
+                let does_first_position_match = does_letter_match(letter, password, first_position);
+                let does_second_position_match =
+                    does_letter_match(letter, password, second_position);
+
+                (does_first_position_match || does_second_position_match)
+                    && !(does_first_position_match && does_second_position_match)
+            }
+        }
+    }
+}
+
+/// Enumerates every way that `PasswordValidationMetadata` can be used.
+pub enum PasswordValidationStrategy {
+    /// Interprets `PasswordValidationMetadata#parameters` as a repetition
+    /// range where the first value is the (inclusive) minimum number of
+    /// letter repetitions in a valid password and the second value is the
+    /// (inclusive) maximum number of repetitions in a valid password.
+    LetterRepetitionRange,
+    /// Interprets `PasswordValidationMetadata#parameters` as legitimate
+    /// positions for the letter in a valid password.
+    LetterPositions,
+}
+
+/// Describes a valid password.
+#[derive(Debug)]
+struct PasswordValidationMetadata {
+    /// The letter to which `maxRepetitions` and `minRepetitions` refer.
+    letter: char,
+    /// Values configuring validation.
+    parameters: (i64, i64),
+}
+
+/// Returns `true` if the `password` character at the specified `position` matches
+/// `letter`.
+fn does_letter_match(letter: &char, password: &str, position: &i64) -> bool {
+    password
+        .chars()
+        .nth((position - 1) as usize)
+        .map(|password_char| password_char == *letter)
+        .unwrap_or(false)
 }
