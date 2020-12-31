@@ -13,6 +13,7 @@ lazy_static! {
     static ref PASSWORD_DATABASE_ENTRY_PATTERN: Regex =
         Regex::new(r"^(\d+)-(\d+)\s+([a-z]):\s+([a-z]+)$").unwrap();
 }
+
 /// Stores password information for the North Pole Toboggan Rental Shop
 /// computer system.
 #[derive(Debug)]
