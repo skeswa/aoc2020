@@ -49,52 +49,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-// /// Finds a pair of expense report enties that sum to `2020`.
-// fn find_expense_report_entry_pair(expense_report_entries: &Vec<i32>) -> Option<(i32, i32)> {
-//     expense_report_entries
-//         .iter()
-//         .flat_map(|expense_report_entry| {
-//             expense_report_entries
-//                 .iter()
-//                 .map(move |other_expense_report_entry| {
-//                     (expense_report_entry, other_expense_report_entry)
-//                 })
-//         })
-//         .find(|(expense_report_entry, other_expense_report_entry)| {
-//             *expense_report_entry + *other_expense_report_entry == 2020
-//         })
-//         .map(|(a, b)| (*a, *b))
-// }
-
-// /// Finds a trio of expense report enties that sum to `2020`.
-// fn find_expense_report_entry_trio(expense_report_entries: &Vec<i32>) -> Option<(i32, i32, i32)> {
-//     expense_report_entries
-//         .iter()
-//         .flat_map(|expense_report_entry| {
-//             expense_report_entries
-//                 .iter()
-//                 .flat_map(move |other_expense_report_entry| {
-//                     expense_report_entries
-//                         .iter()
-//                         .map(move |another_expense_report_entry| {
-//                             (
-//                                 expense_report_entry,
-//                                 other_expense_report_entry,
-//                                 another_expense_report_entry,
-//                             )
-//                         })
-//                 })
-//         })
-//         .find(
-//             |(expense_report_entry, other_expense_report_entry, another_expense_report_entry)| {
-//                 *expense_report_entry + *other_expense_report_entry + *another_expense_report_entry
-//                     == 2020
-//             },
-//         )
-//         .map(|(a, b, c)| (*a, *b, *c))
-// }
-
-/// Reads the input file, returning each line represented as a 32-bit integer.
+/// Turns input file into a new instance of `PasswordDatabase`.
 async fn read_password_database() -> Result<PasswordDatabase, Error> {
     let pwd = current_dir().context("Failed to read current working directory")?;
     let password_database_file_path = pwd.join("files/input.txt");
