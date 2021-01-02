@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         .map(|(_trajectory, tree_count)| *tree_count)
         .product::<usize>();
 
-    println!("\nTree count product {}", tree_count_product);
+    println!("\nTree count product: {}", tree_count_product);
 
     Ok(())
 }
