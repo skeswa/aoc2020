@@ -1,10 +1,12 @@
 extern crate anyhow;
 
 mod slope;
+mod toboggan;
 
 use anyhow::{Context, Error, Result};
 use slope::atlas::SlopeAtlas;
 use std::env::current_dir;
+use toboggan::trajectory::TobogganTrajectory;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 
@@ -15,6 +17,10 @@ async fn main() -> Result<()> {
         .context("Failed to read slope atlas")?;
 
     println!("Hello, world! {:?}", slope_atlas.height());
+
+    let trajectory = TobogganTrajectory::new((0, 0), (3, 1));
+
+    println!("12th: {:?}", trajectory.descend().nth(12).unwrap());
 
     Ok(())
 }
