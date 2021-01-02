@@ -4,7 +4,7 @@ mod slope;
 mod toboggan;
 
 use anyhow::{Context, Error, Result};
-use slope::atlas::SlopeAtlas;
+use slope::atlas::{SlopeAtlas, SlopeFeature};
 use std::env::current_dir;
 use toboggan::trajectory::TobogganTrajectory;
 use tokio::fs::File;
@@ -15,12 +15,22 @@ async fn main() -> Result<()> {
     let slope_atlas = read_slope_atlas()
         .await
         .context("Failed to read slope atlas")?;
-
-    println!("Hello, world! {:?}", slope_atlas.height());
-
     let trajectory = TobogganTrajectory::new((0, 0), (3, 1));
 
-    println!("12th: {:?}", trajectory.descend().nth(12).unwrap());
+    let number_of_trees_along_trajectory = trajectory
+        .descend(slope_atlas.height)
+        .map(|position| {
+            slope_atlas
+                .feature_at(position)
+                .unwrap_or(SlopeFeature::Nothing)
+        })
+        .filter(|feature| *feature == SlopeFeature::Tree)
+        .count();
+
+    println!(
+        "Trees along trajectory: {}",
+        number_of_trees_along_trajectory
+    );
 
     Ok(())
 }

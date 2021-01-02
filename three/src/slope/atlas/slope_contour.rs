@@ -9,6 +9,7 @@ pub struct SlopeContour {
 }
 
 impl SlopeContour {
+    /// Creates a new `SlopeContour` using the text from a slope atlas file.
     pub fn from_text(text: &str) -> Result<SlopeContour> {
         let features = text
             .chars()
@@ -17,5 +18,17 @@ impl SlopeContour {
             .context("Failed to parse slop contours")?;
 
         Ok(SlopeContour { features })
+    }
+
+    /// How wide this contour is.
+    pub fn breadth(&self) -> i64 {
+        self.features.len() as i64
+    }
+
+    /// Returns the feature at the specified `feature_index`.
+    pub fn feature_at(&self, feature_index: i64) -> Option<SlopeFeature> {
+        self.features
+            .get(feature_index as usize)
+            .map(|feature| *feature)
     }
 }

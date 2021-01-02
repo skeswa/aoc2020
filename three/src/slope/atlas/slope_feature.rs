@@ -1,6 +1,6 @@
 use anyhow::{Error, Result};
 /// Enumerates every kind of thing that can appear on the slope.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SlopeFeature {
     /// Describes a part of the slope with nothing on it.
     Nothing,

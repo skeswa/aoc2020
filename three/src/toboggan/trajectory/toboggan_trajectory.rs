@@ -23,24 +23,24 @@ impl TobogganTrajectory {
     }
 
     /// Begins a descent down a slope.
-    pub fn descend(&self) -> impl Iterator<Item = (i64, i64)> {
+    pub fn descend(&self, slope_height: i64) -> TobogganTrajectoryDescender {
         TobogganTrajectoryDescender {
             current_x_position: self.starting_position.0,
             current_y_position: self.starting_position.1,
-            has_descent_begun: false,
+            max_y_position: slope_height - 1,
             velocity: self.velocity,
         }
     }
 }
 
 /// Iterates through every position along a `TobogganTrajectory`.
-struct TobogganTrajectoryDescender {
+pub struct TobogganTrajectoryDescender {
     /// The current x-position of the ongoing descent.
     current_x_position: i64,
     /// The current y-position of the ongoing descent.
     current_y_position: i64,
-    /// `true` if we are no longer at the starting position of descent.
-    has_descent_begun: bool,
+    /// Largest valid `current_y_position`.
+    max_y_position: i64,
     /// `(x, y)` pair describing the direction and magnitude of descent down the slope.
     velocity: (i64, i64),
 }
@@ -50,15 +50,15 @@ impl Iterator for TobogganTrajectoryDescender {
 
     // Advances to the next position in the descent.
     fn next(&mut self) -> Option<(i64, i64)> {
-        if !self.has_descent_begun {
-            let (x_velocity, y_velocity) = self.velocity;
+        let (x_velocity, y_velocity) = self.velocity;
 
-            self.current_x_position += x_velocity;
-            self.current_y_position += y_velocity;
+        self.current_x_position += x_velocity;
+        self.current_y_position += y_velocity;
+
+        if self.current_y_position <= self.max_y_position {
+            Some((self.current_x_position, self.current_y_position))
         } else {
-            self.has_descent_begun = true;
+            None
         }
-
-        Some((self.current_x_position, self.current_y_position))
     }
 }
