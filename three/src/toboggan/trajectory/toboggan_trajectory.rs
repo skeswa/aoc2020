@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 /// Indicates a direction of descent down a slope.
 #[derive(Debug)]
 pub struct TobogganTrajectory {
@@ -30,6 +32,12 @@ impl TobogganTrajectory {
             max_y_position: slope_height - 1,
             velocity: self.velocity,
         }
+    }
+}
+
+impl Display for TobogganTrajectory {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Right {}, down {}", self.velocity.0, self.velocity.1)
     }
 }
 
