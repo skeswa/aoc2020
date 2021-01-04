@@ -19,6 +19,12 @@ async fn main() -> Result<()> {
         .context("Failed to read passport batch")?;
 
     println!(
+        "Complete passport records: {} / {}",
+        passport_record_batch.number_of_complete_records(),
+        passport_record_batch.number_of_records()
+    );
+
+    println!(
         "Valid passport records: {} / {}",
         passport_record_batch.number_of_valid_records(),
         passport_record_batch.number_of_records()

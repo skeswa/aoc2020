@@ -14,8 +14,9 @@ pub enum PassportRecordAttributeKey {
 }
 
 impl PassportRecordAttributeKey {
-    pub fn from_text(text: &str) -> Result<PassportRecordAttributeKey> {
-        match text {
+    /// Returns the `PassportRecordAttributeKey` represented by the given `string`.
+    pub fn from_string(string: &str) -> Result<PassportRecordAttributeKey> {
+        match string {
             "byr" => Ok(PassportRecordAttributeKey::BirthYear),
             "cid" => Ok(PassportRecordAttributeKey::CountryId),
             "eyr" => Ok(PassportRecordAttributeKey::ExpirationYear),
@@ -26,7 +27,7 @@ impl PassportRecordAttributeKey {
             "pid" => Ok(PassportRecordAttributeKey::PassportId),
             _ => Err(Error::msg(format!(
                 "\"{}\" is not a valid attribute key",
-                text
+                string
             ))),
         }
     }
