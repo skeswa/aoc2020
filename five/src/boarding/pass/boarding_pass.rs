@@ -4,6 +4,8 @@ use anyhow::{Context, Error, Result};
 /// Represents information about a specific boarding pass.
 #[derive(Debug)]
 pub struct BoardingPass {
+    pub seat_id: i64,
+
     seat_binary_space_string: String,
     seat_column: i64,
     seat_row: i64,
@@ -41,15 +43,18 @@ impl BoardingPass {
             .evaluate()
             .context("Failed to partition column binary space")?;
 
+        let seat_id = BoardingPass::calculate_seat_id(seat_row, seat_column);
+
         Ok(BoardingPass {
             seat_binary_space_string: seat_binary_space_string.to_owned(),
             seat_column,
+            seat_id,
             seat_row,
         })
     }
 
-    pub fn seat_id(&self) -> i64 {
-        (self.seat_row * 8) + self.seat_column
+    pub fn calculate_seat_id(seat_row: i64, seat_column: i64) -> i64 {
+        (seat_row * 8) + seat_column
     }
 }
 

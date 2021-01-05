@@ -6,6 +6,7 @@ mod boarding;
 
 use anyhow::{Context, Result};
 use boarding::pass::BoardingPass;
+use std::collections::HashSet;
 use std::env::current_dir;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
@@ -18,7 +19,7 @@ async fn main() -> Result<()> {
 
     let max_boarding_pass_seat_id = boarding_passes
         .iter()
-        .map(|boarding_pass| boarding_pass.seat_id())
+        .map(|boarding_pass| boarding_pass.seat_id)
         .max()
         .context("Failed to order boarding passes by seat id")?;
 
@@ -26,6 +27,27 @@ async fn main() -> Result<()> {
         "Maximum boarding pass seat id: {}",
         max_boarding_pass_seat_id
     );
+
+    let boarding_pass_seat_ids = boarding_passes
+        .iter()
+        .map(|boarding_pass| boarding_pass.seat_id)
+        .collect::<HashSet<i64>>();
+
+    for seat_row in 0..128 {
+        print!("{}\t", seat_row);
+
+        for seat_column in 0..8 {
+            let seat_id = BoardingPass::calculate_seat_id(seat_row, seat_column);
+
+            if boarding_pass_seat_ids.contains(&seat_id) {
+                print!("X");
+            } else {
+                print!("?");
+            }
+        }
+
+        println!();
+    }
 
     Ok(())
 }
