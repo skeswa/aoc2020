@@ -14,12 +14,19 @@ pub enum BinarySpacePartition {
     Upper,
 }
 
+/// Arguments for `BinarySpace::new(...)`.
 pub struct NewBinarySpaceArgs {
+    /// First index included in the resulting new binary space.
     pub inclusive_start: i64,
+    /// First index not included in the resulting new binary space.
     pub exclusive_end: i64,
 }
 
 impl BinarySpace {
+    /// Creates a new instance of `BinarySpace`.
+    ///
+    /// Returns `Err(...)` if `exclusive_end` is than or equal
+    /// `inclusive_start`.
     pub fn new(
         NewBinarySpaceArgs {
             inclusive_start,
@@ -39,6 +46,8 @@ impl BinarySpace {
         }
     }
 
+    /// If this binary space has just one number in its range, that number is
+    /// returned.
     pub fn evaluate(&self) -> Result<i64> {
         if self.range == 1 {
             Ok(self.start)
@@ -50,6 +59,8 @@ impl BinarySpace {
         }
     }
 
+    /// Splits this binary space in half for each partition specified by
+    /// `partitions`.
     pub fn partition(mut self, partitions: Vec<BinarySpacePartition>) -> Self {
         for partition in partitions {
             if self.range < 2 {

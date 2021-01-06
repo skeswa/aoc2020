@@ -4,14 +4,24 @@ use anyhow::{Context, Error, Result};
 /// Represents information about a specific boarding pass.
 #[derive(Debug)]
 pub struct BoardingPass {
+    /// Unique identified for the seat associated with this boarding pass; this
+    /// value is a pure function of `seat_column` and `seat_row`.
     pub seat_id: i64,
 
+    /// `String` describing the binary space used to calculate both
+    /// `seat_column` and `seat_row`.
     seat_binary_space_string: String,
+
+    /// Column index of the seat associated with this boarding pass.
     seat_column: i64,
+
+    /// Row index of the seat associated with this boarding pass.
     seat_row: i64,
 }
 
 impl BoardingPass {
+    /// Returns a new `BoardingPass` built by parsing the given
+    /// `seat_binary_space_string`.
     pub fn from_seat_binary_space_string(seat_binary_space_string: &str) -> Result<BoardingPass> {
         let (column_binary_space_index, _) = seat_binary_space_string
             .char_indices()
@@ -53,12 +63,15 @@ impl BoardingPass {
         })
     }
 
+    /// Combines `seat_row` and `seat_column` into a unique seat identifier.
     pub fn calculate_seat_id(seat_row: i64, seat_column: i64) -> i64 {
         (seat_row * 8) + seat_column
     }
 }
 
 impl BinarySpacePartition {
+    /// Maps the individual characters of the given
+    /// `column_binary_space_string` to a sequence of binary space partitions.
     fn list_from_column_binary_space_string(
         column_binary_space_string: &str,
     ) -> Result<Vec<BinarySpacePartition>> {
@@ -75,6 +88,8 @@ impl BinarySpacePartition {
             .collect::<Result<Vec<BinarySpacePartition>>>()
     }
 
+    /// Maps the individual characters of the given
+    /// `row_binary_space_string` to a sequence of binary space partitions.
     fn list_from_row_binary_space_string(
         row_binary_space_string: &str,
     ) -> Result<Vec<BinarySpacePartition>> {

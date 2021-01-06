@@ -33,6 +33,7 @@ async fn main() -> Result<()> {
         .map(|boarding_pass| boarding_pass.seat_id)
         .collect::<HashSet<i64>>();
 
+    println!("Look for your seat in the plane map below:");
     for seat_row in 0..128 {
         print!("{}\t", seat_row);
 
